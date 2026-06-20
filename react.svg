@@ -1,112 +1,145 @@
-// src/App.jsx
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import { heroes, troopRatios } from './data/heroes';
-import { calculateCounter } from './utils/calculator';
-import Results from './components/Results';
-
-function App() {
-  const [scenario, setScenario] = useState('Garrison');
-  const [leadHeroes, setLeadHeroes] = useState([]);
-  const [joiningHeroes, setJoiningHeroes] = useState([]);
-  const [ratioId, setRatioId] = useState('');
-  const [counterResult, setCounterResult] = useState(null);
-
-  // Filter heroes for dropdowns
-  const availableLeads = heroes.filter(h => h.type === 'lead');
-  const availableJoining = heroes.filter(h => h.type === 'joining');
-
-  // Handle multi-select for Leads (max 3)
-  const handleLeadChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
-    if (selectedOptions.length <= 3) {
-      setLeadHeroes(selectedOptions);
-    }
-  };
-
-  // Handle multi-select for Joining (max 4)
-  const handleJoiningChange = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
-    if (selectedOptions.length <= 4) {
-      setJoiningHeroes(selectedOptions);
-    }
-  };
-
-  // Trigger calculation when inputs change
-  useEffect(() => {
-    if (scenario && leadHeroes.length > 0 && joiningHeroes.length > 0 && ratioId) {
-      const selectedRatio = troopRatios.find(r => r.id === ratioId);
-      const inputBuild = {
-        scenario,
-        leadHeroes,
-        joiningHeroes,
-        troopRatio: selectedRatio
-      };
-      
-      const result = calculateCounter(inputBuild);
-      setCounterResult(result);
-    } else {
-      setCounterResult(null); // Clear results if form is incomplete
-    }
-  }, [scenario, leadHeroes, joiningHeroes, ratioId]);
-
-
-  return (
-    <div className="app-container">
-      <header>
-        <h1>Kingshot Rapid Response</h1>
-        <p>Tactical Counter Calculator</p>
-      </header>
-
-      <main className="main-content">
-        <div className="form-container">
-          <h2>Enemy Build</h2>
-          
-          <div className="form-group">
-            <label>Scenario:</label>
-            <select value={scenario} onChange={e => setScenario(e.target.value)}>
-              <option value="Garrison">Garrison Defense</option>
-              <option value="Attacking">Attacking</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label>Lead Heroes (Select up to 3):</label>
-            <select multiple value={leadHeroes} onChange={handleLeadChange} size={4}>
-              {availableLeads.map(hero => (
-                <option key={hero.id} value={hero.id}>{hero.name}</option>
-              ))}
-            </select>
-            <small>Hold Ctrl/Cmd to select multiple. Selected: {leadHeroes.length}/3</small>
-          </div>
-
-          <div className="form-group">
-            <label>Joining Heroes (Select up to 4):</label>
-            <select multiple value={joiningHeroes} onChange={handleJoiningChange} size={5}>
-              {availableJoining.map(hero => (
-                <option key={hero.id} value={hero.id}>{hero.name}</option>
-              ))}
-            </select>
-            <small>Hold Ctrl/Cmd to select multiple. Selected: {joiningHeroes.length}/4</small>
-          </div>
-
-          <div className="form-group">
-            <label>Troop Ratio (Inf/Cav/Arch):</label>
-            <select value={ratioId} onChange={e => setRatioId(e.target.value)}>
-              <option value="">-- Select Ratio --</option>
-              {troopRatios.map(ratio => (
-                <option key={ratio.id} value={ratio.id}>{ratio.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="results-panel">
-          <Results result={counterResult} />
-        </div>
-      </main>
-    </div>
-  );
+/* src/App.css */
+:root {
+  --primary-bg: #1a1a1a;
+  --panel-bg: #2d2d2d;
+  --text-main: #f0f0f0;
+  --text-muted: #aaaaaa;
+  --accent: #d4af37; /* Gold accent for fantasy feel */
+  --accent-hover: #f1c40f;
+  --border-color: #444;
 }
 
-export default App;
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--primary-bg);
+  color: var(--text-main);
+}
+
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 20px;
+}
+
+header h1 {
+  color: var(--accent);
+  margin: 0 0 10px 0;
+  font-size: 2.5em;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+header p {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.main-content {
+  display: flex;
+  gap: 30px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+  }
+}
+
+.form-container, .results-panel {
+  flex: 1;
+  background-color: var(--panel-bg);
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  border: 1px solid var(--border-color);
+}
+
+h2 {
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  color: var(--accent);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+select {
+  padding: 10px;
+  background-color: var(--primary-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+select[multiple] {
+  padding: 5px;
+}
+
+select[multiple] option {
+  padding: 8px;
+  margin-bottom: 2px;
+  border-radius: 3px;
+}
+
+select[multiple] option:checked {
+  background-color: var(--accent);
+  color: #000;
+}
+
+small {
+  color: var(--text-muted);
+  margin-top: 5px;
+  font-size: 0.8em;
+}
+
+/* Results Component Styles */
+.results-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 0;
+}
+
+.result-section {
+  margin-bottom: 20px;
+  background-color: var(--primary-bg);
+  padding: 15px;
+  border-radius: 5px;
+  border-left: 4px solid var(--accent);
+}
+
+.result-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.result-section p {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+.highlight {
+  color: var(--accent);
+  font-weight: bold;
+}
