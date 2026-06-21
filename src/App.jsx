@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react';
+import { useState } from "react";
 import './App.css';
 import { heroes, troopRatios } from './data/heroes';
 import { calculateCounter } from './utils/calculator';
@@ -10,7 +10,6 @@ function App() {
   const [leadHeroes, setLeadHeroes] = useState([]);
   const [joiningHeroes, setJoiningHeroes] = useState([]);
   const [ratioId, setRatioId] = useState('');
-  const [counterResult, setCounterResult] = useState(null);
 
   // Filter heroes for dropdowns
   const availableLeads = heroes.filter(h => h.type === 'lead');
@@ -32,24 +31,18 @@ function App() {
     }
   };
 
-  // Trigger calculation when inputs change
-  useEffect(() => {
-    if (scenario && leadHeroes.length > 0 && joiningHeroes.length > 0 && ratioId) {
-      const selectedRatio = troopRatios.find(r => r.id === ratioId);
-      const inputBuild = {
-        scenario,
-        leadHeroes,
-        joiningHeroes,
-        troopRatio: selectedRatio
-      };
-      
-      const result = calculateCounter(inputBuild);
-      setCounterResult(result);
-    } else {
-      setCounterResult(null); // Clear results if form is incomplete
-    }
-  }, [scenario, leadHeroes, joiningHeroes, ratioId]);
-
+  // Derive result directly during render
+  let counterResult = null;
+  if (scenario && leadHeroes.length > 0 && joiningHeroes.length > 0 && ratioId) {
+    const selectedRatio = troopRatios.find(r => r.id === ratioId);
+    const inputBuild = {
+      scenario,
+      leadHeroes,
+      joiningHeroes,
+      troopRatio: selectedRatio
+    };
+    counterResult = calculateCounter(inputBuild);
+  }
 
   return (
     <div className="app-container">

@@ -1,5 +1,5 @@
 // src/components/Results.jsx
-import React from 'react';
+
 import { heroes } from '../data/heroes';
 
 function Results({ result }) {
